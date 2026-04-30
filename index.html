@@ -4,197 +4,205 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ClickCoins</title>
-    <!-- Подключаем скрипт Telegram для интеграции -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            --main-purple: #8a2be2;
-            --dark-purple: #4b0082;
-            --bg-color: #0f051d;
-        }
-
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            background: radial-gradient(circle at center, #1e0a3d 0%, #0f051d 100%);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: radial-gradient(circle, #1b2735 0%, #090a0f 100%);
             color: white;
-            margin: 0;
-            padding: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             height: 100vh;
-            overflow: hidden; /* Чтобы не было лишней прокрутки на телефоне */
-            touch-action: manipulation; /* Убирает задержку клика на мобилках */
-        }
-
-        .header {
-            margin-top: 20px;
-            text-align: center;
-        }
-
-        h1 { margin: 0; font-size: 24px; color: #d8b4fe; }
-
-        #score-container {
-            font-size: 48px;
-            font-weight: 800;
-            margin: 20px 0;
-            color: white;
-            text-shadow: 0 0 15px var(--main-purple);
-        }
-
-        /* Главная монета */
-        .coin-container {
-            flex-grow: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-        }
-
-        #coin {
-            width: 220px;
-            height: 220px;
-            background: linear-gradient(145deg, var(--main-purple), var(--dark-purple));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 80px;
-            border: 8px solid #a855f7;
-            box-shadow: 0 0 40px rgba(138, 43, 226, 0.6);
-            cursor: pointer;
-            transition: transform 0.05s ease-in-out;
+            margin: 0;
+            overflow: hidden;
             user-select: none;
+            touch-action: manipulation;
+        }
+
+        #game-container {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.8);
+            width: 85%;
+            max-width: 400px;
+        }
+
+        h1 { font-size: 1.8rem; margin-bottom: 5px; color: #00d2ff; }
+
+        #score {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 15px 0;
+            text-shadow: 0 0 20px #00d2ff;
+        }
+
+        #click-button {
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%);
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            transition: transform 0.05s;
+            box-shadow: 0 0 30px rgba(0, 210, 255, 0.5);
+            outline: none;
             -webkit-tap-highlight-color: transparent;
         }
 
-        #coin:active {
+        #click-button:active {
             transform: scale(0.92);
         }
 
-        /* Нижнее меню (Магазин) */
-        .bottom-menu {
-            width: 90%;
-            max-width: 400px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 20px 20px 0 0;
-            padding: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .upgrade-row {
+        .shop {
+            margin-top: 25px;
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
+            flex-direction: column;
+            gap: 10px;
         }
 
-        .btn-upgrade {
-            background: var(--main-purple);
-            border: none;
-            color: white;
-            padding: 12px 15px;
-            border-radius: 12px;
+        .upgrade-btn {
+            background: #2c3e50;
+            color: #bdc3c7;
+            border: 1px solid #34495e;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.9rem;
             font-weight: bold;
-            width: 48%;
-            font-size: 13px;
         }
 
-        .btn-upgrade:disabled {
-            background: #444;
+        .upgrade-btn:disabled {
             opacity: 0.5;
+            cursor: not-allowed;
+            background: #1a252f;
         }
 
-        .stats {
-            text-align: center;
-            font-size: 14px;
-            color: #a78bfa;
-            margin-bottom: 10px;
+        .stats { margin-top: 15px; font-size: 0.8rem; color: #aaa; }
+        
+        .reset-link {
+            margin-top: 20px;
+            display: block;
+            color: #555;
+            font-size: 0.7rem;
+            text-decoration: underline;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
+    <div id="game-container">
         <h1>ClickCoins</h1>
-    </div>
+        <div id="score">0</div>
+        
+        <button id="click-button">КЛИК!</button>
 
-    <div id="score-container">0</div>
-
-    <div class="coin-container">
-        <div id="coin">💎</div>
-    </div>
-
-    <div class="bottom-menu">
         <div class="stats">
-            Клик: +<span id="pwr">1</span> | Авто: +<span id="auto">0</span>/с
+            Сила: <span id="click-power">1</span> | 
+            Авто: <span id="auto-income">0</span>/сек
         </div>
-        <div class="upgrade-row">
-            <button id="buy-click" class="btn-upgrade">Сила (15 🪙)</button>
-            <button id="buy-auto" class="btn-upgrade">Робот (100 🪙)</button>
+
+        <div class="shop">
+            <button id="buy-click" class="upgrade-btn">Улучшить клик (10)</button>
+            <button id="buy-auto" class="upgrade-btn">Нанять робота (50)</button>
         </div>
+        
+        <span class="reset-link" onclick="resetGame()">сбросить всё</span>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // Разворачивает окно в Telegram на весь экран
+        tg.expand();
 
-        let score = 0;
-        let pwr = 1;
-        let auto = 0;
+        // --- ЗАГРУЗКА ДАННЫХ ---
+        let score = parseFloat(localStorage.getItem('cc_score')) || 0;
+        let clickPower = parseInt(localStorage.getItem('cc_pwr')) || 1;
+        let autoIncome = parseInt(localStorage.getItem('cc_auto')) || 0;
+        let costPwr = parseInt(localStorage.getItem('cc_costPwr')) || 10;
+        let costAuto = parseInt(localStorage.getItem('cc_costAuto')) || 50;
 
-        let costPwr = 15;
-        let costAuto = 100;
+        const scoreEl = document.getElementById('score');
+        const pwrEl = document.getElementById('click-power');
+        const autoEl = document.getElementById('auto-income');
+        const btnPwr = document.getElementById('buy-click');
+        const btnAuto = document.getElementById('buy-auto');
 
-        const scoreEl = document.getElementById('score-container');
-        const coin = document.getElementById('coin');
-
-        function update() {
-            scoreEl.textContent = Math.floor(score);
-            document.getElementById('pwr').textContent = pwr;
-            document.getElementById('auto').textContent = auto;
-            
-            document.getElementById('buy-click').textContent = `Клик (${costPwr})`;
-            document.getElementById('buy-auto').textContent = `Робот (${costAuto})`;
-            
-            document.getElementById('buy-click').disabled = score < costPwr;
-            document.getElementById('buy-auto').disabled = score < costAuto;
+        // --- ФУНКЦИИ ---
+        function saveGame() {
+            localStorage.setItem('cc_score', score);
+            localStorage.setItem('cc_pwr', clickPower);
+            localStorage.setItem('cc_auto', autoIncome);
+            localStorage.setItem('cc_costPwr', costPwr);
+            localStorage.setItem('cc_costAuto', costAuto);
         }
 
-        coin.addEventListener('pointerdown', (e) => {
-            score += pwr;
-            // Вибрация для мобилок (если поддерживает Telegram)
-            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
-            update();
+        function updateUI() {
+            scoreEl.textContent = Math.floor(score);
+            pwrEl.textContent = clickPower;
+            autoEl.textContent = autoIncome;
+            
+            btnPwr.textContent = `Улучшить клик (${costPwr})`;
+            btnAuto.textContent = `Нанять робота (${costAuto})`;
+            
+            btnPwr.disabled = score < costPwr;
+            btnAuto.disabled = score < costAuto;
+        }
+
+        function resetGame() {
+            if(confirm("Весь прогресс ClickCoins будет удален. Продолжить?")) {
+                localStorage.clear();
+                location.reload();
+            }
+        }
+
+        // --- СОБЫТИЯ ---
+        document.getElementById('click-button').addEventListener('click', () => {
+            score += clickPower;
+            if (tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+            updateUI();
         });
 
-        document.getElementById('buy-click').addEventListener('click', () => {
+        btnPwr.addEventListener('click', () => {
             if (score >= costPwr) {
                 score -= costPwr;
-                pwr++;
+                clickPower += 1;
                 costPwr = Math.round(costPwr * 1.6);
-                update();
+                saveGame();
+                updateUI();
             }
         });
 
-        document.getElementById('buy-auto').addEventListener('click', () => {
+        btnAuto.addEventListener('click', () => {
             if (score >= costAuto) {
                 score -= costAuto;
-                auto += 1;
+                autoIncome += 1;
                 costAuto = Math.round(costAuto * 2);
-                update();
+                saveGame();
+                updateUI();
             }
         });
 
+        // Авто-доход и авто-сохранение
         setInterval(() => {
-            if (auto > 0) {
-                score += auto;
-                update();
+            if (autoIncome > 0) {
+                score += autoIncome;
+                updateUI();
             }
         }, 1000);
 
-        update();
+        setInterval(saveGame, 5000); // Сохраняем в память каждые 5 сек
+
+        // Запуск интерфейса
+        updateUI();
     </script>
 </body>
 </html>
